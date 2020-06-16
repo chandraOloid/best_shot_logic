@@ -66,18 +66,18 @@ for (x,y,w,h) in faces:
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
-face_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_frontalface_default.xml')
-eye_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_eye.xml')
-left_eye_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_lefteye_2splits.xml')
-right_eye_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_righteye_2splits.xml')
-#nose_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_mcs_nose2.xml')
-#mouth_cascade = cv2.CascadeClassifier('haar-cascade-files/haarcascade_mcs_mouth.xml')
+face_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_eye.xml')
+left_eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_lefteye_2splits.xml')
+right_eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_righteye_2splits.xml')
+nose_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_mcs_nose.xml')
+mouth_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_mcs_mouth.xml')
 
 # load the input image, resize it, and convert it to grayscale
 #cap = cv2.VideoCapture(0)
 #image = cv2.imread('images/1.jpg')
 image = cv2.imread('images/8.jpeg')
-image = cv2.imread('images/9.jpeg')
+image = cv2.imread('images/1.jpeg')
 
 # ksize 
 ksize = (10, 10) 
@@ -87,9 +87,20 @@ if 0:
 	image = cv2.blur(image, ksize)  
 
 def bestShotImg(image):
+	res = {'leye': 0, 'reye': 0, 'leyeopen': 0, 'reyeopen':0, 'nosevisible': 0, 'mouthvisible':0, 'imgBlur': 0, 'landmarkScore': 0, 'mouthrects':[], 'noserects':[]}
 	#image = imutils.resize(image, width=500)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	#nose_rects = nose_cascade.detectMultiScale(gray, 1.3, 5)
+	mouth_rects = mouth_cascade.detectMultiScale(gray, 1.3, 5)
+	res['mouthrects'] = mouth_rects
+	if mouth_rects != []:
+		res['mouthvisible'] = 1
+	
+	#print(mouth_rects)
+	nose_rects = nose_cascade.detectMultiScale(gray, 1.3, 5)
+	res['noserects'] = nose_rects
+	if nose_rects != []:
+		res['nosevisible'] = 1
+	
 	#print(nose_rects)
 	variance = variance_of_laplacian(image)
 	#print(variance)
@@ -106,7 +117,6 @@ def bestShotImg(image):
 	ImageBlur = 0 ---- 1 scale ( 0.1, 0.3 etc. 0 for no blur, 1 for blurred image ) 
 	LandmarkScore = ( add all 0 and 1 of facial Landmark ) 
 	"""
-	res = {'leye': 0, 'reye': 0, 'leyeopen': 0, 'reyeopen':0, 'nosevisible': 1, 'mouthvisible':1, 'imgBlur': 0, 'landmarkScore': 0}
 	if variance < VARIANCE_THRESH: 
 		res['imgBlur'] = 1
 	else: 
