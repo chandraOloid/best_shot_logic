@@ -13,9 +13,11 @@ import argparse
 import imutils
 import dlib
 import cv2
+import time
+from pyimagesearch.blur_detector import detect_blur_fft
 
 EAR_THRESH = 0.23
-VARIANCE_THRESH = 64
+VARIANCE_THRESH = 520
 
 def eye_aspect_ratio(eye):
 	#print(eye)
@@ -70,26 +72,29 @@ face_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_frontalface_defa
 eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_eye.xml')
 left_eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_lefteye_2splits.xml')
 right_eye_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_righteye_2splits.xml')
+
 nose_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_mcs_nose.xml')
 mouth_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_mcs_mouth.xml')
 
 # load the input image, resize it, and convert it to grayscale
 #cap = cv2.VideoCapture(0)
 #image = cv2.imread('images/1.jpg')
-image = cv2.imread('images/8.jpeg')
-image = cv2.imread('images/1.jpeg')
+#image = cv2.imread('images/8.jpeg')
+img = cv2.imread('images/12.jpg')
 
 # ksize 
 ksize = (10, 10) 
 # Using cv2.blur() method  
 
 if 0: 
-	image = cv2.blur(image, ksize)  
+	img = cv2.blur(img, ksize)  
 
 def bestShotImg(image):
 	res = {'leye': 0, 'reye': 0, 'leyeopen': 0, 'reyeopen':0, 'nosevisible': 0, 'mouthvisible':0, 'imgBlur': 0, 'landmarkScore': 0, 'mouthrects':[], 'noserects':[]}
 	#image = imutils.resize(image, width=500)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	#gray = image
+	
 	mouth_rects = mouth_cascade.detectMultiScale(gray, 1.3, 5)
 	res['mouthrects'] = mouth_rects
 	if mouth_rects != []:
@@ -102,7 +107,7 @@ def bestShotImg(image):
 		res['nosevisible'] = 1
 	
 	#print(nose_rects)
-	variance = variance_of_laplacian(image)
+	#variance = variance_of_laplacian(image)
 	#print(variance)
 
 	# detect faces in the grayscale image
@@ -117,10 +122,13 @@ def bestShotImg(image):
 	ImageBlur = 0 ---- 1 scale ( 0.1, 0.3 etc. 0 for no blur, 1 for blurred image ) 
 	LandmarkScore = ( add all 0 and 1 of facial Landmark ) 
 	"""
-	if variance < VARIANCE_THRESH: 
-		res['imgBlur'] = 1
-	else: 
-		res['imgBlur'] = 0
+	#if variance < VARIANCE_THRESH: 
+	#	res['imgBlur'] = 1
+	#else: 
+	#	res['imgBlur'] = 0
+	(mean, blurry) = detect_blur_fft(gray, size=60, thresh=10, vis=-1 > 0)
+	print('blur_fft_mean = ', mean)
+	res['imgBlur'] = blurry
 	# loop over the face detections
 	for (i, rect) in enumerate(rects):
 		# determine the facial landmarks for the face region, then
@@ -140,12 +148,12 @@ def bestShotImg(image):
 			res['leye'] = 1
 			res['reye'] = 1
 			if name == 'left_eye':
-				ear = eye_aspect_ratio(shape[i:j+1])
+				ear = eye_aspect_ratio(shape[i:j])
 				if ear > EAR_THRESH:
 					res['leyeopen'] = 1
 					
 			if name == 'right_eye':		
-				ear = eye_aspect_ratio(shape[i:j+1])
+				ear = eye_aspect_ratio(shape[i:j])
 				if ear > EAR_THRESH:
 					res['reyeopen'] = 1
 					
@@ -158,9 +166,16 @@ def bestShotImg(image):
 			(x, y, w, h) = cv2.boundingRect(np.array([shape[i:j]]))
 			roi = image[y:y + h, x:x + w]
 			roi = imutils.resize(roi, width=250, inter=cv2.INTER_CUBIC)
+			"""
 			cv2.imshow('img', image)
-			#key = cv2.waitKey(0)
+			key = cv2.waitKey(0)
+			if key == 27:
+				break
+			"""
 	return res
 
-res = bestShotImg(image)
+t1= time.time()
+res = bestShotImg(img)
+t2 = time.time()
+print('dt=',t2-t1)
 print(res)
