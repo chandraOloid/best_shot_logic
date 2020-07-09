@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, url_for, redirect, make_respo
 from flask_restful import Resource, Api, reqparse
 from detect_face_parts import *
 import json
-import jsonify
 
 app = Flask(__name__)
 api = Api(app)

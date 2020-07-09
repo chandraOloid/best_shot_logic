@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 MAINTAINER Chandra Mangipudi "mcprakash2009@gmail.com"
 
 RUN apt-get update -y && \
-    apt-get install -y python2-pip python2-dev
+    apt-get install -y python-pip python-dev
 
 RUN apt-get install -y --fix-missing \
     build-essential \
@@ -21,8 +21,8 @@ RUN apt-get install -y --fix-missing \
     liblapack-dev \
     libswscale-dev \
     pkg-config \
-    python2-dev \
-    python2-numpy \
+    python-dev \
+    python-numpy \
     software-properties-common \
     zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*

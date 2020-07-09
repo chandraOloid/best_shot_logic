@@ -1,5 +1,7 @@
 numpy
 scipy
 imutils
-cv2
+opencv-python
 dlib
+flask
+flask_restful
