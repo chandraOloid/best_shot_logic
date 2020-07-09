@@ -14,6 +14,9 @@ import imutils
 import dlib
 import cv2
 import time
+import sys
+
+
 from pyimagesearch.blur_detector import detect_blur_fft
 
 EAR_THRESH = 0.23
@@ -80,29 +83,35 @@ mouth_cascade = cv2.CascadeClassifier('cascade_files/haarcascade_mcs_mouth.xml')
 #cap = cv2.VideoCapture(0)
 #image = cv2.imread('images/1.jpg')
 #image = cv2.imread('images/8.jpeg')
-img = cv2.imread('images/12.jpg')
 
+"""
 # ksize 
 ksize = (10, 10) 
 # Using cv2.blur() method  
 
 if 0: 
 	img = cv2.blur(img, ksize)  
+"""
+
+def bestShotImgName(imgname):
+	image = cv2.imread(imgname)
+	return bestShotImg(image)
 
 def bestShotImg(image):
+	#image = cv2.imread(imgname)
 	res = {'leye': 0, 'reye': 0, 'leyeopen': 0, 'reyeopen':0, 'nosevisible': 0, 'mouthvisible':0, 'imgBlur': 0, 'landmarkScore': 0, 'mouthrects':[], 'noserects':[]}
 	#image = imutils.resize(image, width=500)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	#gray = image
 	
 	mouth_rects = mouth_cascade.detectMultiScale(gray, 1.3, 5)
-	res['mouthrects'] = mouth_rects
+	#res['mouthrects'] = mouth_rects
 	if mouth_rects != []:
 		res['mouthvisible'] = 1
 	
 	#print(mouth_rects)
 	nose_rects = nose_cascade.detectMultiScale(gray, 1.3, 5)
-	res['noserects'] = nose_rects
+	#res['noserects'] = nose_rects
 	if nose_rects != []:
 		res['nosevisible'] = 1
 	
@@ -128,7 +137,7 @@ def bestShotImg(image):
 	#	res['imgBlur'] = 0
 	(mean, blurry) = detect_blur_fft(gray, size=60, thresh=10, vis=-1 > 0)
 	print('blur_fft_mean = ', mean)
-	res['imgBlur'] = blurry
+	res['imgBlur'] = int(blurry)
 	# loop over the face detections
 	for (i, rect) in enumerate(rects):
 		# determine the facial landmarks for the face region, then
@@ -174,8 +183,19 @@ def bestShotImg(image):
 			"""
 	return res
 
-t1= time.time()
-res = bestShotImg(img)
-t2 = time.time()
-print('dt=',t2-t1)
-print(res)
+if __name__ == '__main__':
+	"""
+	parser = argparse.ArgumentParser(description='Enter Image TBD')
+	parser.add_argument('--image', metavar='i', type=str, nargs='+',
+						help='an integer for the accumulator')
+
+	args = parser.parse_args()
+	print(args)
+	"""
+	img = sys.argv[1]
+	#print(img)
+	t1= time.time()
+	res = bestShotImg(img)
+	t2 = time.time()
+	print('dt=',t2-t1)
+	print(res)
