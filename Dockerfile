@@ -54,6 +54,8 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
+EXPOSE 5000
+
 COPY . /app
 
 CMD [ "python2", "app.py" ]
